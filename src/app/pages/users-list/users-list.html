@@ -1,37 +1,29 @@
-<section class="users-page">
-  <h2 class="h">Users</h2>
+<div class="page" @listIn>
+  <div class="heading">
+    <h1>Users</h1>
+    <p>Browse the directory and open a user to view details.</p>
+  </div>
 
-  <ng-container *ngIf="res$ | async as res; else loading">
-    <div class="cards">
+  <ng-container *ngIf="(res$() | async) as res">
+    <div class="stack">
       <a
-        class="card-link"
+        class="user-card"
         *ngFor="let u of res.data; trackBy: trackById"
         [routerLink]="['/users', u.id]"
       >
-        <mat-card class="user-card" appearance="outlined">
-          <img class="avatar" [src]="u.avatar" [alt]="u.first_name" />
-          <div class="meta">
-            <div class="name">{{ u.first_name }} {{ u.last_name }}</div>
-            <div class="id">ID: {{ u.id }}</div>
-          </div>
-        </mat-card>
+        <img class="avatar" [src]="u.avatar" alt="" />
+        <div class="meta">
+          <div class="name">{{ u.first_name }} {{ u.last_name }}</div>
+          <div class="sub">ID: {{ u.id }}</div>
+        </div>
+        <div class="chev">›</div>
       </a>
     </div>
 
-    <div class="paginator">
-      <mat-paginator
-        [length]="res.total"
-        [pageSize]="res.per_page"
-        [pageIndex]="res.page - 1"
-        [hidePageSize]="true"
-        (page)="onPageChange($event)"
-      ></mat-paginator>
+    <div class="pager">
+      <button class="nav" (click)="prev()" [disabled]="page() <= 1">‹</button>
+      <div class="info">Page {{ page() }} / {{ res.total_pages }}</div>
+      <button class="nav" (click)="next(res.total_pages)" [disabled]="page() >= res.total_pages">›</button>
     </div>
   </ng-container>
-
-  <ng-template #loading>
-    <div class="loading">
-      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
-    </div>
-  </ng-template>
-</section>
+</div>

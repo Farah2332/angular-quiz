@@ -1,73 +1,77 @@
-import { Component, signal } from '@angular/core';
-import { NgIf } from '@angular/common';
-import { Router } from '@angular/router';
-import { catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
+import { Component, inject } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatOptionModule } from '@angular/material/core';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
-import { UsersService, ReqresUser } from '../../services/users';
-import { LoadingService } from '../../services/loading';
+import { filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { UsersService } from '../../services/users';
 
 @Component({
   selector: 'app-header',
   standalone: true,
   imports: [
-    NgIf,
+    CommonModule,
+    RouterLink,
     ReactiveFormsModule,
     MatToolbarModule,
     MatFormFieldModule,
     MatInputModule,
-    MatProgressBarModule,
-    MatAutocompleteModule,
-    MatOptionModule,
+    MatIconModule,
+    MatButtonModule,
   ],
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
-export class Header {
-  search = new FormControl<string>('', { nonNullable: true });
-  foundUser = signal<ReqresUser | null>(null);
-  notFound = signal(false);
+export class HeaderComponent {
+  private router = inject(Router);
+  private users = inject(UsersService);
 
-  constructor(
-    public loading: LoadingService,
-    private users: UsersService,
-    private router: Router
-  ) {
-    this.search.valueChanges
+  searchId = new FormControl<string>('', { nonNullable: true });
+  errorMsg = '';
+
+  constructor() {
+    // When user types a valid numeric id, fetch + navigate to details
+    this.searchId.valueChanges
       .pipe(
-        debounceTime(250),
+        debounceTime(300),
         distinctUntilChanged(),
-        switchMap((value) => {
-          const id = Number(value);
-          this.notFound.set(false);
-          this.foundUser.set(null);
-
-          if (!value || !Number.isFinite(id) || id <= 0) return of(null);
-
-          return this.users.getUserById(id).pipe(
-            catchError(() => {
-              this.notFound.set(true);
-              return of(null);
-            })
-          );
-        })
+        filter((v) => !!v),
+        filter((v) => /^\d+$/.test(v!))
       )
-      .subscribe((user) => {
-        if (user) this.foundUser.set(user);
+      .subscribe((v) => {
+        const id = Number(v);
+
+        this.users.getUserById(id).subscribe({
+          next: (res) => {
+            // ReqRes single-user response is { data: user }
+            const user = (res as any)?.data;
+            if (user?.id) {
+              this.errorMsg = '';
+              this.router.navigate(['/users', user.id]);
+            } else {
+              this.errorMsg = 'User not found';
+            }
+          },
+          error: () => {
+            this.errorMsg = 'User not found';
+          },
+        });
       });
   }
 
-  goToUser(id: number) {
-    this.router.navigate(['/users', id]);
-    this.search.setValue('');
-    this.foundUser.set(null);
-    this.notFound.set(false);
+  clear() {
+    // Clear input + error
+    this.searchId.setValue('');
+    this.errorMsg = '';
+
+    // IMPORTANT: go back to list page
+    // If your list route is '/' this is correct:
+    this.router.navigate(['/']);
   }
 }

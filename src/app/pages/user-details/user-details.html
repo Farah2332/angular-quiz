@@ -1,20 +1,17 @@
-<ng-container *ngIf="user$ | async as u; else loading">
-  <div class="top">
-    <a mat-stroked-button routerLink="/users">← Back</a>
-  </div>
+<section class="wrap">
+  <a mat-button routerLink="/users" class="back">
+    <mat-icon>arrow_back</mat-icon>
+    Back
+  </a>
 
-  <mat-card class="details" appearance="outlined">
-    <img class="avatar" [src]="u.avatar" [alt]="u.first_name" />
-    <div class="info">
-      <h2>{{ u.first_name }} {{ u.last_name }}</h2>
-      <div class="line"><b>ID:</b> {{ u.id }}</div>
-      <div class="line"><b>Email:</b> {{ u.email }}</div>
-    </div>
-  </mat-card>
-</ng-container>
-
-<ng-template #loading>
-  <div class="loading">
-    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
-  </div>
-</ng-template>
+  <ng-container *ngIf="user$ | async as res">
+    <mat-card class="details" appearance="outlined">
+      <img class="avatar" [src]="res.data.avatar" alt="" />
+      <div class="info">
+        <h1>{{ res.data.first_name }} {{ res.data.last_name }}</h1>
+        <div class="row"><b>ID:</b> {{ res.data.id }}</div>
+        <div class="row"><b>Email:</b> {{ res.data.email }}</div>
+      </div>
+    </mat-card>
+  </ng-container>
+</section>

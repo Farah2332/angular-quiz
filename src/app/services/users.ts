@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map, shareReplay } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, shareReplay, tap } from 'rxjs';
 
 export type ReqresUser = {
   id: number;
@@ -10,7 +10,7 @@ export type ReqresUser = {
   avatar: string;
 };
 
-type UsersPageResponse = {
+export type UsersResponse = {
   page: number;
   per_page: number;
   total: number;
@@ -18,47 +18,82 @@ type UsersPageResponse = {
   data: ReqresUser[];
 };
 
-type SingleUserResponse = {
+export type UserResponse = {
   data: ReqresUser;
 };
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
-private readonly baseUrl = 'https://reqres.in/api';
+  private http = new HttpClient((null as any));
 
+  // IMPORTANT: Angular DI will replace the fake HttpClient above in runtime
+  // (This is only to keep TS happy in some editors if DI isn't resolved).
+  // If your editor complains, delete the line above and inject normally as constructor(private http: HttpClient) {}
 
+  private base = 'https://reqres.in/api';
 
-  private pageCache = new Map<number, Observable<UsersPageResponse>>();
-  private userCache = new Map<number, Observable<ReqresUser>>();
+  // If reqres now requires x-api-key for single user endpoints, keep it here:
+  // Put your key if you have one; otherwise leave empty.
+  private apiKey = 'reqres_edf62570014346bdbea9e8ebef829c27';
 
-  constructor(private http: HttpClient) {}
+  private pageCache = new Map<number, Observable<UsersResponse>>();
+  private userCache = new Map<number, Observable<UserResponse>>();
 
-  getUsersPage(page: number): Observable<UsersPageResponse> {
-    const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  constructor(realHttp: HttpClient) {
+    // swap in the DI http
+    (this.http as any) = realHttp;
+  }
 
-    const cached = this.pageCache.get(safePage);
-    if (cached) return cached;
+  private headers(): HttpHeaders | undefined {
+    if (!this.apiKey) return undefined;
+    return new HttpHeaders({ 'x-api-key': this.apiKey });
+  }
+
+  getUsersPage(page: number): Observable<UsersResponse> {
+    const cached = this.pageCache.get(page);
+    if (cached) {
+      console.log(`CACHE HIT → users page ${page}`);
+      return cached;
+    }
+
+    console.log(`API CALL → users page ${page}`);
 
     const req$ = this.http
-      .get<UsersPageResponse>(`${this.baseUrl}/users`, { params: { page: safePage } })
-      .pipe(shareReplay(1));
+      .get<UsersResponse>(`${this.base}/users?page=${page}`, {
+        headers: this.headers(),
+      })
+      .pipe(
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
 
-    this.pageCache.set(safePage, req$);
+    this.pageCache.set(page, req$);
     return req$;
   }
 
-  getUserById(id: number): Observable<ReqresUser> {
-    const safeId = Number.isFinite(id) && id > 0 ? Math.floor(id) : NaN;
+  getUserById(id: number): Observable<UserResponse> {
+    const cached = this.userCache.get(id);
+    if (cached) {
+      console.log(`CACHE HIT → user id ${id}`);
+      return cached;
+    }
 
-    const cached = this.userCache.get(safeId);
-    if (cached) return cached;
+    console.log(`API CALL → user id ${id}`);
 
-    const req$ = this.http.get<SingleUserResponse>(`${this.baseUrl}/users/${safeId}`).pipe(
-      map((r) => r.data),
-      shareReplay(1)
-    );
+    const req$ = this.http
+      .get<UserResponse>(`${this.base}/users/${id}`, {
+        headers: this.headers(),
+      })
+      .pipe(
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
 
-    this.userCache.set(safeId, req$);
+    this.userCache.set(id, req$);
     return req$;
+  }
+
+  // Optional helper if you want to clear cache (not required by quiz)
+  clearCache(): void {
+    this.pageCache.clear();
+    this.userCache.clear();
   }
 }

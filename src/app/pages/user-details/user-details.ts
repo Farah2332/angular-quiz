@@ -1,32 +1,26 @@
-import { Component } from '@angular/core';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { switchMap } from 'rxjs';
+
+import { UsersService } from '../../services/users';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-import { UsersService } from '../../services/users';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-user-details',
   standalone: true,
-  imports: [
-    NgIf,
-    AsyncPipe,
-    RouterLink,
-    MatCardModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule],
   templateUrl: './user-details.html',
   styleUrl: './user-details.scss',
 })
-export class UserDetails {
-  user$;
+export class UserDetailsComponent {
+  private route = inject(ActivatedRoute);
+  private users = inject(UsersService);
 
-  constructor(private route: ActivatedRoute, private users: UsersService) {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.user$ = this.users.getUserById(id);
-  }
+  user$ = this.route.paramMap.pipe(
+    switchMap((pm) => this.users.getUserById(Number(pm.get('id'))))
+  );
 }

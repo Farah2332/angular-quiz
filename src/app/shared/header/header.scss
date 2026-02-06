@@ -1,17 +1,164 @@
-.toolbar {
+.topbar {
   position: sticky;
   top: 0;
   z-index: 20;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, #7c3aed, #2563eb);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
 }
 
 .title {
   font-weight: 650;
+  letter-spacing: 0.2px;
 }
 
 .spacer {
   flex: 1;
 }
 
+/* Search stays on the RIGHT because spacer pushes it */
 .search {
-  width: 320px;
+  width: min(420px, 46vw);
+  margin-right: 10px;
+}
+
+/* -----------------------------
+   Make the search bar look premium
+   AND keep suffix INSIDE
+------------------------------ */
+
+/* The wrapper is the element that should be rounded + filled */
+:host ::ng-deep .search .mat-mdc-text-field-wrapper {
+  height: 42px;
+  border-radius: 14px;
+  overflow: hidden; /* <<< hard clip anything that would overflow */
+  background: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.10),
+    rgba(37, 99, 235, 0.10)
+  );
+
+  /* Give room for suffix INSIDE without pushing it outside */
+  padding-right: 6px !important;
+}
+
+/* Keep the outline rounded too */
+:host ::ng-deep .search .mdc-notched-outline,
+:host ::ng-deep .search .mdc-notched-outline__leading,
+:host ::ng-deep .search .mdc-notched-outline__notch,
+:host ::ng-deep .search .mdc-notched-outline__trailing {
+  border-radius: 14px;
+}
+
+/* Align content vertically */
+:host ::ng-deep .search .mat-mdc-form-field-flex {
+  height: 42px;
+  align-items: center;
+}
+
+:host ::ng-deep .search .mat-mdc-form-field-infix {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+}
+
+/* Input text + placeholder perfectly centered vertically */
+:host ::ng-deep .search input.mat-mdc-input-element {
+  height: 42px;
+  line-height: 42px;
+  padding: 0 6px !important;
+  margin: 0 !important;
+}
+
+/* Prefix icon (blue/purple) */
+.search-icon {
+  color: #2563eb;
+  opacity: 0.95;
+  margin-right: 6px;
+}
+
+/* --- Suffix area fixed and inside --- */
+:host ::ng-deep .search .mat-mdc-form-field-icon-suffix {
+  display: flex;
+  align-items: center;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* The clear button: small, inside, cannot overflow */
+:host ::ng-deep .search .clear-btn.mat-mdc-icon-button,
+:host ::ng-deep .search .clear-btn.mat-mdc-button-base {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 100px;
+  box-sizing: border-box;
+
+  background: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.22),
+    rgba(37, 99, 235, 0.22)
+  );
+}
+
+/* Icon size inside the button */
+:host ::ng-deep .search .clear-btn mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  color: #1e3a8a;
+}
+
+/* Hover */
+:host ::ng-deep .search .clear-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.32),
+    rgba(37, 99, 235, 0.32)
+  );
+}
+
+.error {
+  color: #b91c1c;
+}
+/* === FINAL FIX: remove ONLY the clear button box, keep X icon === */
+:host ::ng-deep .search .clear-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* kill Angular Material state layer (the invisible square) */
+:host ::ng-deep .search .clear-btn .mat-mdc-focus-indicator::before,
+:host ::ng-deep .search .clear-btn .mat-mdc-focus-indicator::after {
+  opacity: 0 !important;
+}
+
+/* remove browser focus ring */
+:host ::ng-deep .search .clear-btn:focus,
+:host ::ng-deep .search .clear-btn:focus-visible {
+  outline: none !important;
 }
