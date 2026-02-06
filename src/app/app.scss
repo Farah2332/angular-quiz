@@ -1,3 +1,5 @@
-.shell {
-  min-height: calc(100vh - 72px);
+.top-loader {
+  position: sticky;
+  top: 64px; /* header height */
+  z-index: 30;
 }
