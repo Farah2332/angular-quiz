@@ -1,0 +1,70 @@
+.users-page {
+  display: grid;
+  gap: 16px;
+}
+
+.h {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center; // required: horizontally centered ✅
+  padding-top: 8px;
+}
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.user-card {
+  width: 260px;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.user-card:hover {
+  transform: translateY(-2px);
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.meta {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+}
+
+.name {
+  font-weight: 650;
+}
+
+.id {
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.paginator {
+  display: flex;
+  justify-content: center;
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  min-height: 240px;
+}

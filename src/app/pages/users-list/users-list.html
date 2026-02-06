@@ -1,0 +1,37 @@
+<section class="users-page">
+  <h2 class="h">Users</h2>
+
+  <ng-container *ngIf="res$ | async as res; else loading">
+    <div class="cards">
+      <a
+        class="card-link"
+        *ngFor="let u of res.data; trackBy: trackById"
+        [routerLink]="['/users', u.id]"
+      >
+        <mat-card class="user-card" appearance="outlined">
+          <img class="avatar" [src]="u.avatar" [alt]="u.first_name" />
+          <div class="meta">
+            <div class="name">{{ u.first_name }} {{ u.last_name }}</div>
+            <div class="id">ID: {{ u.id }}</div>
+          </div>
+        </mat-card>
+      </a>
+    </div>
+
+    <div class="paginator">
+      <mat-paginator
+        [length]="res.total"
+        [pageSize]="res.per_page"
+        [pageIndex]="res.page - 1"
+        [hidePageSize]="true"
+        (page)="onPageChange($event)"
+      ></mat-paginator>
+    </div>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="loading">
+      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    </div>
+  </ng-template>
+</section>

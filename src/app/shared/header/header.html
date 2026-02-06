@@ -1,0 +1,28 @@
+<mat-toolbar color="primary" class="toolbar">
+  <span class="title">Users</span>
+  <span class="spacer"></span>
+
+  <mat-form-field appearance="outline" class="search">
+    <mat-label>Search user by ID</mat-label>
+    <input
+      matInput
+      [formControl]="search"
+      placeholder="e.g. 7"
+      [matAutocomplete]="auto"
+    />
+    <mat-autocomplete #auto="matAutocomplete">
+      @if (foundUser(); as u) {
+        <mat-option (click)="goToUser(u.id)">
+          {{ u.first_name }} {{ u.last_name }} — ID {{ u.id }}
+        </mat-option>
+      }
+      @if (notFound()) {
+        <mat-option disabled>User not found</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+</mat-toolbar>
+
+@if (loading.isLoading()) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+}

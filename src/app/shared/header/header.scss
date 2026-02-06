@@ -1,0 +1,17 @@
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.title {
+  font-weight: 650;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.search {
+  width: 320px;
+}
